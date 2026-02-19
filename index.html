@@ -393,3 +393,164 @@
         const okState = (state === "all") ? true : (c.state === state);
         const hay = (c.title + " " + c.front + " " + c.back + " " + (c.tags||[]).join(" ")).toLowerCase();
         const okQ = q ? hay.includes(q) : true;
+        return okState && okQ;
+      });
+
+      if(filtered.length === 0){
+        els.items.innerHTML = `<div class="item"><p class="itemTitle">Ei osumia. 😅</p><p class="itemMeta">Kokeile eri hakusanaa tai suodatusta.</p></div>`;
+        els.countLabel.textContent = "0 korttia";
+        renderEmptyCard();
+        return;
+      }
+
+      els.countLabel.textContent = `${filtered.length} korttia`;
+      currentIndex = Math.min(currentIndex, filtered.length - 1);
+      renderList();
+      renderCard();
+    }
+
+    function renderEmptyCard(){
+      els.cardTitle.textContent = "—";
+      els.cardMeta.textContent = "—";
+      els.cardBadge.textContent = "—";
+      els.cardMain.textContent = "—";
+      els.cardHint.textContent = "—";
+    }
+
+    function renderList(){
+      els.items.innerHTML = filtered.map((c, idx) => {
+        const tags = (c.tags || []).slice(0,3).map(t => `<span class="pill">#${t}</span>`).join(" ");
+        return `
+          <div class="item" data-idx="${idx}">
+            <p class="itemTitle">${c.title}</p>
+            <div class="itemMeta">
+              <span class="pill">${stateLabel(c.state)}</span>
+              ${tags}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      els.items.querySelectorAll(".item").forEach(node => {
+        node.addEventListener("click", () => {
+          currentIndex = Number(node.dataset.idx);
+          showFront = true;
+          renderCard();
+          saveLast();
+        });
+      });
+    }
+
+    function renderCard(){
+      const c = filtered[currentIndex];
+      if(!c){ renderEmptyCard(); return; }
+
+      els.cardTitle.textContent = c.title;
+      els.cardMeta.textContent = `Kortti ${currentIndex+1}/${filtered.length} • ID: ${c.id}`;
+      els.cardBadge.textContent = `🔎 ${stateLabel(c.state)}`;
+
+      const text = showFront ? c.front : c.back;
+      els.cardMain.textContent = text;
+
+      els.cardHint.textContent = showFront
+        ? "Etu: harjoite / ohje. Käännä kortti nähdäksesi lisäohjeen."
+        : "Taka: miksi tämä toimii / miten soveltaa. Käännä takaisin etupuolelle.";
+
+      els.flipBtn.textContent = showFront ? "🔁 Käännä kortti" : "↩️ Takaisin etupuolelle";
+    }
+
+    function next(){
+      if(filtered.length === 0) return;
+      currentIndex = (currentIndex + 1) % filtered.length;
+      showFront = true;
+      renderCard();
+      saveLast();
+    }
+
+    function prev(){
+      if(filtered.length === 0) return;
+      currentIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+      showFront = true;
+      renderCard();
+      saveLast();
+    }
+
+    function randomPick(){
+      if(filtered.length === 0) return;
+      currentIndex = Math.floor(Math.random() * filtered.length);
+      showFront = true;
+      renderCard();
+      saveLast();
+    }
+
+    function flip(){
+      if(filtered.length === 0) return;
+      showFront = !showFront;
+      renderCard();
+    }
+
+    async function copyText(){
+      if(filtered.length === 0) return;
+      const c = filtered[currentIndex];
+      const text = `${c.title}\n\n${showFront ? c.front : c.back}`;
+      try{
+        await navigator.clipboard.writeText(text);
+        els.copyBtn.textContent = "✅ Kopioitu";
+        setTimeout(()=> els.copyBtn.textContent = "📋 Kopioi teksti", 900);
+      }catch(e){
+        alert("Kopiointi ei onnistunut tässä selaimessa. Voit valita tekstin käsin.");
+      }
+    }
+
+    function saveLast(){
+      const c = filtered[currentIndex];
+      if(!c) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        id: c.id,
+        stateFilter: els.stateFilter.value,
+        search: els.search.value || ""
+      }));
+    }
+
+    function loadLast(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return;
+        const last = JSON.parse(raw);
+        if(last.stateFilter) els.stateFilter.value = last.stateFilter;
+        if(typeof last.search === "string") els.search.value = last.search;
+
+        applyFilters();
+        const idx = filtered.findIndex(x => x.id === last.id);
+        if(idx >= 0){
+          currentIndex = idx;
+          showFront = true;
+          renderCard();
+        }
+      }catch(_){}
+    }
+
+    // ========== EVENTS ==========
+    els.stateFilter.addEventListener("change", () => { applyFilters(); saveLast(); });
+    els.search.addEventListener("input", () => { applyFilters(); saveLast(); });
+
+    els.nextBtn.addEventListener("click", next);
+    els.prevBtn.addEventListener("click", prev);
+    els.randomBtn.addEventListener("click", randomPick);
+    els.flipBtn.addEventListener("click", flip);
+    els.copyBtn.addEventListener("click", copyText);
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowRight") next();
+      if(e.key === "ArrowLeft") prev();
+      if(e.key === " ") { e.preventDefault(); flip(); }
+    });
+
+    // init
+    applyFilters();
+    loadLast();
+    renderCard();
+  </script>
+</body>
+</html>
+
