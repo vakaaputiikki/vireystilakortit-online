@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vireystilaa vakauttavat kortit – testiversio</title>
+  <title>Vireystilaa vakauttavat kortit – online</title>
+
+  <!-- (valinnainen) poistaa favicon 404 -->
+  <link rel="icon" href="data:," />
+
   <style>
     :root{
       --bg:#f7f6fb;
@@ -13,6 +17,7 @@
       --border:#e6e5ee;
       --shadow: 0 10px 30px rgba(20, 20, 40, 0.08);
       --radius: 18px;
+      --pill:#fbfbfe;
     }
     *{box-sizing:border-box}
     body{
@@ -23,7 +28,7 @@
     }
     header{
       padding: 22px 16px 10px;
-      max-width: 980px;
+      max-width: 1100px;
       margin: 0 auto;
     }
     h1{
@@ -35,11 +40,11 @@
       margin:0;
       color: var(--muted);
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     main{
-      max-width: 980px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 12px 16px 24px;
       display: grid;
@@ -71,15 +76,18 @@
       font-size: 14px;
       cursor:pointer;
     }
-    button:hover{filter:brightness(0.98)}
+    button:hover{filter:brightness(0.985)}
     button:active{transform: translateY(1px)}
+    button.secondary{
+      background: var(--pill);
+    }
 
     .layout{
       display:grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-columns: 1.25fr 0.75fr;
       gap: 12px;
     }
-    @media (max-width: 880px){
+    @media (max-width: 920px){
       .layout{grid-template-columns: 1fr}
     }
 
@@ -89,7 +97,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
-      min-height: 340px;
+      min-height: 420px;
       display:flex;
       flex-direction:column;
     }
@@ -132,11 +140,21 @@
       gap: 10px;
       flex:1;
     }
-    .big{
-      font-size: 18px;
-      line-height: 1.45;
-      margin:0;
+
+    .imgWrap{
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
     }
+
+    img.cardImage{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
     .hint{
       margin:0;
       color:var(--muted);
@@ -185,7 +203,7 @@
     }
 
     .items{
-      max-height: 420px;
+      max-height: 520px;
       overflow:auto;
     }
     .item{
@@ -218,8 +236,9 @@
       font-size: 12px;
       color: var(--muted);
     }
+
     .footer{
-      max-width:980px;
+      max-width:1100px;
       margin: 0 auto;
       padding: 0 16px 28px;
       color: var(--muted);
@@ -235,14 +254,63 @@
       background:#fff;
       color: var(--muted);
     }
+
+    /* PRINT */
+    @media print {
+      body{ background:#fff; }
+      header, .toolbar, .list, .footer { display:none !important; }
+      main { padding:0; max-width:none; }
+      .layout{ grid-template-columns: 1fr; }
+      .card{ box-shadow:none; border:none; border-radius:0; }
+      .cardTop{ border:none; padding:0 0 10px 0; }
+      .cardActions{ display:none !important; }
+
+      .printGrid{
+        display:grid !important;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .printCard{
+        page-break-inside: avoid;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .printTitle{
+        font-size: 14px;
+        margin: 0 0 8px 0;
+        color:#111;
+      }
+      .printMeta{
+        font-size: 11px;
+        color:#444;
+        margin: 0 0 10px 0;
+      }
+      .printImg{
+        width:100%;
+        height:auto;
+        display:block;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        overflow:hidden;
+      }
+      .noPrintNote{ display:none !important; }
+    }
+
+    .printArea{ display:none; }
+    .printNote{
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Vireystilaa vakauttavat kortit – testiversio 🧠✨</h1>
+    <h1>Vireystilaa vakauttavat kortit – online 🧠✨</h1>
     <p class="sub">
-      Avaa kortti, käännä (etu/taka), suodata tilan mukaan ja arvo satunnainen.
+      Suodata tilan mukaan, selaa ja käännä etu/taka.
       <br/>Pikanäppäimet: <span class="kbd">←</span>/<span class="kbd">→</span> vaihda korttia, <span class="kbd">Space</span> käännä.
     </p>
   </header>
@@ -257,10 +325,12 @@
           <option value="tasapaino">Tasapaino</option>
         </select>
 
-        <button id="randomBtn">🎲 Satunnainen</button>
+        <button id="randomBtn" class="secondary">🎲 Satunnainen</button>
       </div>
 
       <div class="right">
+        <button id="printOneBtn" class="secondary">🖨️ Tulosta tämä</button>
+        <button id="printPackBtn" class="secondary">🗂️ Tulosta suodatetut</button>
         <button id="prevBtn">← Edellinen</button>
         <button id="nextBtn">Seuraava →</button>
       </div>
@@ -277,112 +347,114 @@
         </div>
 
         <div class="cardBody">
-          <p class="big" id="cardMain">—</p>
+          <div class="imgWrap">
+            <img id="cardImage" class="cardImage" alt="">
+          </div>
           <p class="hint" id="cardHint">—</p>
+          <p class="printNote noPrintNote" id="printNote">Vinkki: tulostaessa selaimesi asetuksista “taustagrafiikka” voi olla pois päältä – se ei haittaa kuvia.</p>
         </div>
 
         <div class="cardActions">
           <button id="flipBtn">🔁 Käännä kortti</button>
-          <button id="copyBtn">📋 Kopioi teksti</button>
         </div>
       </section>
 
       <aside class="list">
         <div class="listHeader">
-          <input id="search" class="search" placeholder="Hae korttia (esim. hengitys, liike, turva)..." />
+          <input id="search" class="search" placeholder="Hae (otsikosta tai tageista)..." />
           <div class="count" id="countLabel">—</div>
         </div>
         <div class="items" id="items"></div>
       </aside>
     </div>
+
+    <!-- Print area (filled by JS, visible only in print) -->
+    <div class="printArea" id="printArea"></div>
   </main>
 
   <div class="footer">
-    Testiversio on tarkoituksella yksinkertainen. Kun tää toimii, seuraavat stepit on:
-    1) lisää sun oikeat korttitekstit, 2) lisää kuvat, 3) julkaise GitHub Pages / Netlify. 🚀
+    Tämä on kuvapohjainen testiversio. Korttikuvat haetaan polusta <b>assets/cards/</b>.
+    <br/>Jos joku kortti ei näy: tarkista tiedostonimi + polku + isot/pienet kirjaimet. ✅
   </div>
 
   <script>
-    
-    window.addEventListener("error", (e) => {
-  const msg = `JS ERROR: ${e.message}\nFile: ${e.filename}\nLine: ${e.lineno}:${e.colno}`;
-  alert(msg);
-});
+    // =====================================================
+    // 1) MUOKKAA TÄMÄ OSIO: korttien määrät ja nimet
+    // =====================================================
+    // OLETUS: kuvat nimillä
+    // 001_front.png ja 001_back.png jne.
+    //
+    // Tee vain nämä:
+    // - NUM_CARDS = montako korttia on
+    // - CARD_STATES = kortti-id -> tila
+    // - CARD_TITLES = kortti-id -> otsikko (valinnainen)
+    // - CARD_TAGS = kortti-id -> tagit (valinnainen)
+    //
+    const NUM_CARDS = 50; // <-- muuta tämä vastaamaan oikeaa määrääsi
 
-console.log("JS started ✅");
+    // TILAT: jos et täytä, oletus = "tasapaino"
+    // Esim: "001":"ylivire", "002":"alivire"
+    const CARD_STATES = {
+      // "001": "ylivire",
+      // "002": "alivire",
+      // ...
+    };
 
-    // ========== DATA: muokkaa nämä sun korteiksi ==========
-    // state: "ylivire" | "alivire" | "tasapaino"
-    const CARDS = [
-      {
-        id: "yli-1",
-        state: "ylivire",
-        title: "Hidasta: 3 ankkuria tilaan",
-        front: "Katso ympärillesi ja nimeä hiljaa: 3 asiaa jonka näät, 2 ääntä jonka kuulet, 1 tunne kehossa.",
-        back: "Tavoite: siirtää huomio pois uhasta tähän hetkeen. Tee tämä rauhallisesti 20–60 sekuntia.",
-        tags: ["ankkurointi", "aistit", "turva"]
-      },
-      {
-        id: "yli-2",
-        state: "ylivire",
-        title: "Pidempi uloshengitys",
-        front: "Hengitä sisään 3–4 sek, ulos 5–7 sek. Toista 6 kierrosta.",
-        back: "Jos huimaa: lyhennä kierrosta. Ajatus ei ole ‘suorittaa’ vaan antaa keholle viesti: nyt ei ole kiire.",
-        tags: ["hengitys", "rauhoittuminen"]
-      },
-      {
-        id: "ali-1",
-        state: "alivire",
-        title: "Herättely: paina jalat maahan",
-        front: "Nouse seisomaan. Paina jalkapohjia lattiaan 5 x 3 sek. Ravista käsiä 15 sek.",
-        back: "Tavoite: lisätä kehon aktivaatioita lempeästi. Jos tulee levoton olo, vähennä ravistelua.",
-        tags: ["liike", "aktivointi"]
-      },
-      {
-        id: "ali-2",
-        state: "alivire",
-        title: "Kylmä + liike (mini)",
-        front: "Huuhtele kädet kylmällä vedellä 10–20 sek ja tee sen jälkeen 30 sek reipasta kävelyä paikallaan.",
-        back: "Tavoite: nostaa virettä nopeasti ja turvallisesti. Ei jos sydän oireilee tai kylmä tuntuu pahalta.",
-        tags: ["kylmä", "liike"]
-      },
-      {
-        id: "tas-1",
-        state: "tasapaino",
-        title: "Pidä kiinni hyvästä",
-        front: "Huomaa 1 asia joka on nyt ok. Anna sen tuntua kehossa 10–20 sek.",
-        back: "Tavoite: vahvistaa palautumisen muistijälkeä. Pieni riittää.",
-        tags: ["resurssi", "turva"]
-      },
-      {
-        id: "tas-2",
-        state: "tasapaino",
-        title: "4H: Huomioi – Hempeästi hyväksy",
-        front: "Sano hiljaa: ‘Tässä on tämä hetki.’ Ja hengitä kerran rauhassa ulos.",
-        back: "Tavoite: vähentää vastustusta. Ei tarvitse tykätä olosta, riittää että tunnistat sen.",
-        tags: ["4H", "hyväksyntä"]
-      }
-    ];
+    // OTSIKOT (valinnainen). Jos puuttuu, otsikko = "Kortti 001"
+    const CARD_TITLES = {
+      // "001": "Hidasta: 3 ankkuria tilaan",
+      // ...
+    };
 
-    // ========== APP STATE ==========
+    // TAGIT (valinnainen)
+    const CARD_TAGS = {
+      // "001": ["ankkurointi","turva"],
+      // ...
+    };
+
+    // =====================================================
+    // 2) DATA GENEROINTI
+    // =====================================================
+    function pad3(n){ return String(n).padStart(3, "0"); }
+
+    const CARDS = Array.from({length: NUM_CARDS}, (_, i) => {
+      const id = pad3(i+1);
+      return {
+        id,
+        state: CARD_STATES[id] || "tasapaino",
+        title: CARD_TITLES[id] || `Kortti ${id}`,
+        imgFront: `assets/cards/${id}_front.png`,
+        imgBack:  `assets/cards/${id}_back.png`,
+        tags: CARD_TAGS[id] || []
+      };
+    });
+
+    // =====================================================
+    // 3) APP STATE
+    // =====================================================
     const els = {
       stateFilter: document.getElementById("stateFilter"),
       randomBtn: document.getElementById("randomBtn"),
       prevBtn: document.getElementById("prevBtn"),
       nextBtn: document.getElementById("nextBtn"),
       flipBtn: document.getElementById("flipBtn"),
-      copyBtn: document.getElementById("copyBtn"),
+      printOneBtn: document.getElementById("printOneBtn"),
+      printPackBtn: document.getElementById("printPackBtn"),
+
       cardTitle: document.getElementById("cardTitle"),
       cardMeta: document.getElementById("cardMeta"),
       cardBadge: document.getElementById("cardBadge"),
-      cardMain: document.getElementById("cardMain"),
+      cardImage: document.getElementById("cardImage"),
       cardHint: document.getElementById("cardHint"),
+      printNote: document.getElementById("printNote"),
+
       items: document.getElementById("items"),
       search: document.getElementById("search"),
       countLabel: document.getElementById("countLabel"),
+      printArea: document.getElementById("printArea"),
     };
 
-    const STORAGE_KEY = "vireyskortit_last";
+    const STORAGE_KEY = "vireyskortit_last_img";
     let filtered = [...CARDS];
     let currentIndex = 0;
     let showFront = true;
@@ -399,7 +471,7 @@ console.log("JS started ✅");
 
       filtered = CARDS.filter(c => {
         const okState = (state === "all") ? true : (c.state === state);
-        const hay = (c.title + " " + c.front + " " + c.back + " " + (c.tags||[]).join(" ")).toLowerCase();
+        const hay = (c.title + " " + (c.tags||[]).join(" ")).toLowerCase();
         const okQ = q ? hay.includes(q) : true;
         return okState && okQ;
       });
@@ -421,8 +493,8 @@ console.log("JS started ✅");
       els.cardTitle.textContent = "—";
       els.cardMeta.textContent = "—";
       els.cardBadge.textContent = "—";
-      els.cardMain.textContent = "—";
       els.cardHint.textContent = "—";
+      els.cardImage.removeAttribute("src");
     }
 
     function renderList(){
@@ -455,14 +527,14 @@ console.log("JS started ✅");
 
       els.cardTitle.textContent = c.title;
       els.cardMeta.textContent = `Kortti ${currentIndex+1}/${filtered.length} • ID: ${c.id}`;
-      els.cardBadge.textContent = `🔎 ${stateLabel(c.state)}`;
+      els.cardBadge.textContent = `🫧 ${stateLabel(c.state)}`;
 
-      const text = showFront ? c.front : c.back;
-      els.cardMain.textContent = text;
+      const img = showFront ? c.imgFront : (c.imgBack || c.imgFront);
+      els.cardImage.src = img;
 
       els.cardHint.textContent = showFront
-        ? "Etu: harjoite / ohje. Käännä kortti nähdäksesi lisäohjeen."
-        : "Taka: miksi tämä toimii / miten soveltaa. Käännä takaisin etupuolelle.";
+        ? "Etu: kortin etupuoli. Käännä nähdäksesi takapuolen."
+        : "Taka: kortin takapuoli. Käännä takaisin etupuolelle.";
 
       els.flipBtn.textContent = showFront ? "🔁 Käännä kortti" : "↩️ Takaisin etupuolelle";
     }
@@ -497,26 +569,14 @@ console.log("JS started ✅");
       renderCard();
     }
 
-    async function copyText(){
-      if(filtered.length === 0) return;
-      const c = filtered[currentIndex];
-      const text = `${c.title}\n\n${showFront ? c.front : c.back}`;
-      try{
-        await navigator.clipboard.writeText(text);
-        els.copyBtn.textContent = "✅ Kopioitu";
-        setTimeout(()=> els.copyBtn.textContent = "📋 Kopioi teksti", 900);
-      }catch(e){
-        alert("Kopiointi ei onnistunut tässä selaimessa. Voit valita tekstin käsin.");
-      }
-    }
-
     function saveLast(){
       const c = filtered[currentIndex];
       if(!c) return;
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         id: c.id,
         stateFilter: els.stateFilter.value,
-        search: els.search.value || ""
+        search: els.search.value || "",
+        showFront
       }));
     }
 
@@ -532,13 +592,62 @@ console.log("JS started ✅");
         const idx = filtered.findIndex(x => x.id === last.id);
         if(idx >= 0){
           currentIndex = idx;
-          showFront = true;
-          renderCard();
         }
+        showFront = (typeof last.showFront === "boolean") ? last.showFront : true;
+        renderCard();
       }catch(_){}
     }
 
-    // ========== EVENTS ==========
+    // =====================================================
+    // PRINT
+    // =====================================================
+    function buildPrintHTML(cardsToPrint){
+      // Print area is only for printing
+      const blocks = cardsToPrint.map(c => {
+        const title = c.title;
+        const meta = `ID: ${c.id} • ${stateLabel(c.state)} • etu + taka`;
+        const front = c.imgFront;
+        const back = c.imgBack || c.imgFront;
+
+        return `
+          <div class="printCard">
+            <p class="printTitle">${escapeHtml(title)}</p>
+            <p class="printMeta">${escapeHtml(meta)}</p>
+            <img class="printImg" src="${front}" alt="">
+            <div style="height:10px"></div>
+            <img class="printImg" src="${back}" alt="">
+          </div>
+        `;
+      }).join("");
+
+      return `<div class="printGrid">${blocks}</div>`;
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function printOne(){
+      if(filtered.length === 0) return;
+      const c = filtered[currentIndex];
+      els.printArea.innerHTML = buildPrintHTML([c]);
+      els.printArea.classList.add("printGrid");
+      window.print();
+    }
+
+    function printPack(){
+      if(filtered.length === 0) return;
+      // Tulostetaan kaikki suodatetut kortit (etu+taka)
+      els.printArea.innerHTML = buildPrintHTML(filtered);
+      els.printArea.classList.add("printGrid");
+      window.print();
+    }
+
+    // =====================================================
+    // EVENTS
+    // =====================================================
     els.stateFilter.addEventListener("change", () => { applyFilters(); saveLast(); });
     els.search.addEventListener("input", () => { applyFilters(); saveLast(); });
 
@@ -546,7 +655,9 @@ console.log("JS started ✅");
     els.prevBtn.addEventListener("click", prev);
     els.randomBtn.addEventListener("click", randomPick);
     els.flipBtn.addEventListener("click", flip);
-    els.copyBtn.addEventListener("click", copyText);
+
+    els.printOneBtn.addEventListener("click", printOne);
+    els.printPackBtn.addEventListener("click", printPack);
 
     window.addEventListener("keydown", (e) => {
       if(e.key === "ArrowRight") next();
@@ -554,12 +665,10 @@ console.log("JS started ✅");
       if(e.key === " ") { e.preventDefault(); flip(); }
     });
 
-    // init
+    // INIT
     applyFilters();
     loadLast();
     renderCard();
   </script>
 </body>
 </html>
-
-
