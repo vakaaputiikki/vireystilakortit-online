@@ -303,6 +303,14 @@
   </div>
 
   <script>
+    
+    window.addEventListener("error", (e) => {
+  const msg = `JS ERROR: ${e.message}\nFile: ${e.filename}\nLine: ${e.lineno}:${e.colno}`;
+  alert(msg);
+});
+
+console.log("JS started ✅");
+
     // ========== DATA: muokkaa nämä sun korteiksi ==========
     // state: "ylivire" | "alivire" | "tasapaino"
     const CARDS = [
@@ -553,4 +561,5 @@
   </script>
 </body>
 </html>
+
 
