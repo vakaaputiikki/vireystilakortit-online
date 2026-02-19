@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vireystilaa vakauttavat kortit – testiversio</title>
+  <style>
+    :root{
+      --bg:#f7f6fb;
+      --card:#ffffff;
+      --text:#1f2330;
+      --muted:#5c637a;
+      --border:#e6e5ee;
+      --shadow: 0 10px 30px rgba(20, 20, 40, 0.08);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg, #f7f6fb, #f2f5fb);
+      color: var(--text);
+    }
+    header{
+      padding: 22px 16px 10px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    h1{
+      font-size: 20px;
+      margin: 0 0 6px;
+      letter-spacing: 0.2px;
+    }
+    .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    main{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px 16px 24px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      background: rgba(255,255,255,0.7);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .left, .right{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
+    select, button{
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor:pointer;
+    }
+    button:hover{filter:brightness(0.98)}
+    button:active{transform: translateY(1px)}
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+    }
+    @media (max-width: 880px){
+      .layout{grid-template-columns: 1fr}
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 340px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .cardTop{
+      padding: 16px 16px 10px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      border-bottom:1px solid var(--border);
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: #fbfbfe;
+      white-space:nowrap;
+    }
+    .title{
+      font-size: 18px;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .meta{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .cardBody{
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      flex:1;
+    }
+    .big{
+      font-size: 18px;
+      line-height: 1.45;
+      margin:0;
+    }
+    .hint{
+      margin:0;
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .cardActions{
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      background: #fcfcff;
+    }
+
+    .list{
+      background: rgba(255,255,255,0.7);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .listHeader{
+      padding: 12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .search{
+      flex:1;
+      border:1px solid var(--border);
+      padding:10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      outline:none;
+      background:#fff;
+    }
+    .count{
+      color:var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
+    }
+
+    .items{
+      max-height: 420px;
+      overflow:auto;
+    }
+    .item{
+      padding: 12px 14px;
+      border-bottom:1px solid var(--border);
+      cursor:pointer;
+      background: transparent;
+    }
+    .item:hover{background:#fbfbfe}
+    .itemTitle{
+      margin:0;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+    .itemMeta{
+      margin:6px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .pill{
+      padding: 3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .footer{
+      max-width:980px;
+      margin: 0 auto;
+      padding: 0 16px 28px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      border:1px solid var(--border);
+      border-bottom-width:2px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background:#fff;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Vireystilaa vakauttavat kortit – testiversio 🧠✨</h1>
+    <p class="sub">
+      Avaa kortti, käännä (etu/taka), suodata tilan mukaan ja arvo satunnainen.
+      <br/>Pikanäppäimet: <span class="kbd">←</span>/<span class="kbd">→</span> vaihda korttia, <span class="kbd">Space</span> käännä.
+    </p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="left">
+        <select id="stateFilter" aria-label="Suodata vireystilan mukaan">
+          <option value="all">Kaikki tilat</option>
+          <option value="ylivire">Ylivire</option>
+          <option value="alivire">Alivire</option>
+          <option value="tasapaino">Tasapaino</option>
+        </select>
+
+        <button id="randomBtn">🎲 Satunnainen</button>
+      </div>
+
+      <div class="right">
+        <button id="prevBtn">← Edellinen</button>
+        <button id="nextBtn">Seuraava →</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card" aria-live="polite">
+        <div class="cardTop">
+          <div>
+            <h2 class="title" id="cardTitle">—</h2>
+            <p class="meta" id="cardMeta">—</p>
+          </div>
+          <div class="badge" id="cardBadge">—</div>
+        </div>
+
+        <div class="cardBody">
+          <p class="big" id="cardMain">—</p>
+          <p class="hint" id="cardHint">—</p>
+        </div>
+
+        <div class="cardActions">
+          <button id="flipBtn">🔁 Käännä kortti</button>
+          <button id="copyBtn">📋 Kopioi teksti</button>
+        </div>
+      </section>
+
+      <aside class="list">
+        <div class="listHeader">
+          <input id="search" class="search" placeholder="Hae korttia (esim. hengitys, liike, turva)..." />
+          <div class="count" id="countLabel">—</div>
+        </div>
+        <div class="items" id="items"></div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="footer">
+    Testiversio on tarkoituksella yksinkertainen. Kun tää toimii, seuraavat stepit on:
+    1) lisää sun oikeat korttitekstit, 2) lisää kuvat, 3) julkaise GitHub Pages / Netlify. 🚀
+  </div>
+
+  <script>
+    // ========== DATA: muokkaa nämä sun korteiksi ==========
+    // state: "ylivire" | "alivire" | "tasapaino"
+    const CARDS = [
+      {
+        id: "yli-1",
+        state: "ylivire",
+        title: "Hidasta: 3 ankkuria tilaan",
+        front: "Katso ympärillesi ja nimeä hiljaa: 3 asiaa jonka näät, 2 ääntä jonka kuulet, 1 tunne kehossa.",
+        back: "Tavoite: siirtää huomio pois uhasta tähän hetkeen. Tee tämä rauhallisesti 20–60 sekuntia.",
+        tags: ["ankkurointi", "aistit", "turva"]
+      },
+      {
+        id: "yli-2",
+        state: "ylivire",
+        title: "Pidempi uloshengitys",
+        front: "Hengitä sisään 3–4 sek, ulos 5–7 sek. Toista 6 kierrosta.",
+        back: "Jos huimaa: lyhennä kierrosta. Ajatus ei ole ‘suorittaa’ vaan antaa keholle viesti: nyt ei ole kiire.",
+        tags: ["hengitys", "rauhoittuminen"]
+      },
+      {
+        id: "ali-1",
+        state: "alivire",
+        title: "Herättely: paina jalat maahan",
+        front: "Nouse seisomaan. Paina jalkapohjia lattiaan 5 x 3 sek. Ravista käsiä 15 sek.",
+        back: "Tavoite: lisätä kehon aktivaatioita lempeästi. Jos tulee levoton olo, vähennä ravistelua.",
+        tags: ["liike", "aktivointi"]
+      },
+      {
+        id: "ali-2",
+        state: "alivire",
+        title: "Kylmä + liike (mini)",
+        front: "Huuhtele kädet kylmällä vedellä 10–20 sek ja tee sen jälkeen 30 sek reipasta kävelyä paikallaan.",
+        back: "Tavoite: nostaa virettä nopeasti ja turvallisesti. Ei jos sydän oireilee tai kylmä tuntuu pahalta.",
+        tags: ["kylmä", "liike"]
+      },
+      {
+        id: "tas-1",
+        state: "tasapaino",
+        title: "Pidä kiinni hyvästä",
+        front: "Huomaa 1 asia joka on nyt ok. Anna sen tuntua kehossa 10–20 sek.",
+        back: "Tavoite: vahvistaa palautumisen muistijälkeä. Pieni riittää.",
+        tags: ["resurssi", "turva"]
+      },
+      {
+        id: "tas-2",
+        state: "tasapaino",
+        title: "4H: Huomioi – Hempeästi hyväksy",
+        front: "Sano hiljaa: ‘Tässä on tämä hetki.’ Ja hengitä kerran rauhassa ulos.",
+        back: "Tavoite: vähentää vastustusta. Ei tarvitse tykätä olosta, riittää että tunnistat sen.",
+        tags: ["4H", "hyväksyntä"]
+      }
+    ];
+
+    // ========== APP STATE ==========
+    const els = {
+      stateFilter: document.getElementById("stateFilter"),
+      randomBtn: document.getElementById("randomBtn"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      flipBtn: document.getElementById("flipBtn"),
+      copyBtn: document.getElementById("copyBtn"),
+      cardTitle: document.getElementById("cardTitle"),
+      cardMeta: document.getElementById("cardMeta"),
+      cardBadge: document.getElementById("cardBadge"),
+      cardMain: document.getElementById("cardMain"),
+      cardHint: document.getElementById("cardHint"),
+      items: document.getElementById("items"),
+      search: document.getElementById("search"),
+      countLabel: document.getElementById("countLabel"),
+    };
+
+    const STORAGE_KEY = "vireyskortit_last";
+    let filtered = [...CARDS];
+    let currentIndex = 0;
+    let showFront = true;
+
+    function stateLabel(state){
+      if(state === "ylivire") return "Ylivire";
+      if(state === "alivire") return "Alivire";
+      return "Tasapaino";
+    }
+
+    function applyFilters(){
+      const state = els.stateFilter.value;
+      const q = (els.search.value || "").trim().toLowerCase();
+
+      filtered = CARDS.filter(c => {
+        const okState = (state === "all") ? true : (c.state === state);
+        const hay = (c.title + " " + c.front + " " + c.back + " " + (c.tags||[]).join(" ")).toLowerCase();
+        const okQ = q ? hay.includes(q) : true;
